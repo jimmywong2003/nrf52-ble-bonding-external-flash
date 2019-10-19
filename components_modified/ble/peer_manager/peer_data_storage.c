@@ -50,6 +50,11 @@
 #include "fds.h"
 
 
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+
+
 // Macro for verifying that the peer id is within a valid range.
 #define VERIFY_PEER_ID_IN_RANGE(id)         VERIFY_FALSE((id >= PM_PEER_ID_N_AVAILABLE_IDS), \
                                             NRF_ERROR_INVALID_PARAM)
@@ -180,6 +185,8 @@ static void peer_data_delete()
     fds_record_desc_t desc;
     fds_find_token_t  ftok;
 
+    NRF_LOG_INFO("%s", __func__);
+
     memset(&ftok, 0x00, sizeof(fds_find_token_t));
     peer_id = peer_id_get_next_deleted(PM_PEER_ID_INVALID);
 
@@ -271,6 +278,7 @@ static void fds_evt_handler(fds_evt_t const * const p_fds_evt)
         .peer_id = file_id_to_peer_id(p_fds_evt->write.file_id)
     };
 
+    NRF_LOG_INFO("%s p_fds_evt->id = %02x", __func__, p_fds_evt->id);
     switch (p_fds_evt->id)
     {
         case FDS_EVT_WRITE:
@@ -347,6 +355,8 @@ static void fds_evt_handler(fds_evt_t const * const p_fds_evt)
 ret_code_t pds_init()
 {
     ret_code_t ret;
+
+    NRF_LOG_INFO("%s", __func__);
 
     // Check for re-initialization if debugging.
     NRF_PM_DEBUG_CHECK(!m_module_initialized);
@@ -608,6 +618,9 @@ ret_code_t pds_peer_data_delete(pm_peer_id_t peer_id, pm_peer_data_id_t data_id)
 {
     ret_code_t        ret;
     fds_record_desc_t record_desc;
+
+
+    NRF_LOG_INFO("%s", __func__);
 
     NRF_PM_DEBUG_CHECK(m_module_initialized);
 

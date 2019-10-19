@@ -78,7 +78,7 @@
 #include "nrf_log_default_backends.h"
 
 
-#define DEVICE_NAME                         "Nordic_HRM"                            /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "810_HRM"                            /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                   "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                    300                                     /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
 #define APP_ADV_TIMEOUT_IN_SECONDS          180                                     /**< The advertising timeout in units of seconds. */
@@ -152,6 +152,7 @@ static ble_uuid_t m_adv_uuids[] =                                   /**< Univers
     {BLE_UUID_DEVICE_INFORMATION_SERVICE,   BLE_UUID_TYPE_BLE}
 };
 
+static bool m_advertising_is_running = false;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -196,8 +197,12 @@ void advertising_start(bool erase_bonds)
     {
         ret_code_t err_code;
 
-        err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
-        APP_ERROR_CHECK(err_code);
+        if (m_advertising_is_running != true)
+        {
+            err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
+            APP_ERROR_CHECK(err_code);
+        }
+        m_advertising_is_running = true;
     }
 }
 
@@ -229,6 +234,7 @@ static void pm_evt_handler(pm_evt_t const * p_evt)
         case PM_EVT_BONDED_PEER_CONNECTED:
         {
             NRF_LOG_INFO("Connected to a previously bonded device.");
+            m_advertising_is_running = false;
         } break;
 
         case PM_EVT_CONN_SEC_SUCCEEDED:
@@ -908,6 +914,12 @@ void bsp_event_handler(bsp_event_t event)
                 }
             }
             break;
+
+        case BSP_EVENT_KEY_3:
+        {
+             NRF_LOG_INFO("Press Key 3");
+             delete_bonds();
+        }
 
         default:
             break;
